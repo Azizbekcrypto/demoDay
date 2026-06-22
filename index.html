@@ -6,8 +6,9 @@
 <title>Demoday Baraban</title>
 <style>
   :root {
-    --gold: #fbbf24; --gold-2: #f59e0b; --green: #34d399;
-    --navy-text: #14274a; --card: rgba(255,255,255,0.06); --border: rgba(255,255,255,0.14);
+    /* CoddyCamp brend ranglari: coral (--gold) + to'q ko'k */
+    --gold: #ff6a3d; --gold-2: #ff8a5c; --green: #4f9df5;
+    --navy-text: #1b2a4a; --card: rgba(255,255,255,0.06); --border: rgba(255,255,255,0.14);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -39,10 +40,14 @@
   .lang button.active { background: linear-gradient(90deg,var(--gold),var(--gold-2)); color: #1e1b4b; }
 
   header { text-align: center; margin: 38px 0 6px; padding: 0 16px; }
+  .brand { position: fixed; top: 16px; left: 16px; z-index: 10; background: #fff;
+    border-radius: 14px; padding: 8px 12px;
+    box-shadow: 0 10px 24px rgba(255,106,61,.25), 0 4px 12px rgba(0,0,0,.35); }
+  .brand img { display: block; width: clamp(92px, 16vw, 128px); height: auto; }
   header .kicker { text-transform: uppercase; letter-spacing: 5px; font-size: 12px;
-    color: var(--gold); margin-bottom: 10px; font-weight: 700; }
+    color: var(--gold); margin-bottom: 10px; font-weight: 800; }
   header h1 { font-size: clamp(30px,5.5vw,54px); font-weight: 900; letter-spacing: -.5px;
-    background: linear-gradient(90deg,#fbbf24,#34d399,#60a5fa);
+    background: linear-gradient(90deg,#ffb199,#ff6a3d,#ff8a5c);
     -webkit-background-clip: text; background-clip: text; color: transparent; }
   header p { color: #c7d2fe; margin-top: 12px; font-size: 15px; }
 
@@ -62,7 +67,7 @@
     box-shadow: 0 0 0 10px rgba(255,255,255,.10), 0 0 0 13px rgba(0,0,0,.30), 0 22px 55px rgba(0,0,0,.55); }
   .pointer { position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
     width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent;
-    border-top: 32px solid #ef4444; filter: drop-shadow(0 4px 4px rgba(0,0,0,.55)); z-index: 6; }
+    border-top: 32px solid var(--gold); filter: drop-shadow(0 4px 4px rgba(0,0,0,.55)); z-index: 6; }
   .hub { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
     width: 70px; height: 70px; border-radius: 50%; background: #fff; border: 4px solid var(--navy-text);
     box-shadow: 0 6px 16px rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center;
@@ -131,6 +136,7 @@
   </div>
 
   <header>
+    <div class="brand"><img src="coddycamp.jpg" alt="CoddyCamp IT Academy" /></div>
     <div class="kicker" id="kicker">Demoday</div>
     <h1 id="title">🎡 Vazifa Barabani</h1>
     <p id="subtitle">Ikkala barabanni aylantiring — tanlangan vazifa pastda ochiladi</p>
@@ -170,7 +176,7 @@
     <div id="annBody"></div>
   </section>
 
-  <footer id="footer">© Demoday — Vazifa Barabani · statik versiya</footer>
+  <footer id="footer">© CoddyCamp IT Academy — Demoday · Vazifa Barabani</footer>
 
 <script>
 /* ============================================================
@@ -322,7 +328,7 @@ const UI = {
     spin:"🎲 AYLANTIRISH", annHead:"Natija",
     annTitle:"Demoday'da qilishingiz kerak bo'lgan vazifalar",
     weeksFrom:"Wix'dan", botFrom:"Telegram bot'dan",
-    footer:"© Demoday — Vazifa Barabani · statik versiya", htmlLang:"uz",
+    footer:"© CoddyCamp IT Academy — Demoday · Vazifa Barabani", htmlLang:"uz",
     reset:"↺ Qayta boshlash",
     allDone:"🎉 Barcha variantlar tanlab bo'lindi! Qaytadan boshlash uchun «Qayta boshlash» tugmasini bosing yoki sahifani yangilang."
   },
@@ -333,7 +339,7 @@ const UI = {
     spin:"🎲 КРУТИТЬ", annHead:"Результат",
     annTitle:"Задания, которые нужно выполнить на Demoday",
     weeksFrom:"Из Wix", botFrom:"Из Telegram бота",
-    footer:"© Demoday — Барабан заданий · статичная версия", htmlLang:"ru",
+    footer:"© CoddyCamp IT Academy — Demoday · Барабан заданий", htmlLang:"ru",
     reset:"↺ Начать заново",
     allDone:"🎉 Все варианты выбраны! Нажмите «Начать заново» или обновите страницу."
   }
@@ -450,7 +456,7 @@ function confetti(){
   for(let i=0;i<90;i++){
     const c=document.createElement("div"); c.className="confetti";
     c.style.left=secureRandom(100)+"vw";
-    c.style.background=["#fbbf24","#34d399","#60a5fa","#f472b6","#a78bfa","#f87171"][secureRandom(6)];
+    c.style.background=["#ff6a3d","#ff8a5c","#ffb199","#4f9df5","#1b2a4a","#ffd1bf"][secureRandom(6)];
     c.style.transform="rotate("+secureRandom(360)+"deg)";
     document.body.appendChild(c);
     c.animate([{top:"-12px",opacity:1},{top:"100vh",opacity:.2}],
