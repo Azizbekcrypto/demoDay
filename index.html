@@ -6,38 +6,38 @@
 <title>Demoday Baraban</title>
 <style>
   :root {
-    /* CoddyCamp brend ranglari: coral (--gold) + to'q ko'k */
-    --gold: #ff6a3d; --gold-2: #ff8a5c; --green: #4f9df5;
-    --navy-text: #1b2a4a; --card: rgba(255,255,255,0.06); --border: rgba(255,255,255,0.14);
+    /* CoddyCamp brend ranglari: coral (--gold) + to'q ko'k, och fon */
+    --gold: #ff6a3d; --gold-2: #ff8a5c; --green: #2f7df0;
+    --navy-text: #1b2a4a; --card: #ffffff; --border: #ece3d9; --muted: #64748b;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
-    font-family: "Segoe UI", system-ui, sans-serif; min-height: 100vh; color: #f1f5f9;
+    font-family: "Segoe UI", system-ui, sans-serif; min-height: 100vh; color: var(--navy-text);
     display: flex; flex-direction: column; align-items: center; overflow-x: hidden;
     background:
-      radial-gradient(1200px 700px at 12% -8%, #4338ca 0%, transparent 52%),
-      radial-gradient(1100px 700px at 92% 6%, #0e7490 0%, transparent 50%),
-      radial-gradient(900px 600px at 50% 110%, #6d28d9 0%, transparent 55%),
-      linear-gradient(135deg, #0f172a, #1e1b4b);
+      radial-gradient(1100px 650px at 12% -8%, #ffe3d6 0%, transparent 55%),
+      radial-gradient(1000px 650px at 92% 4%, #dfeaff 0%, transparent 55%),
+      radial-gradient(900px 600px at 50% 112%, #ffe9df 0%, transparent 58%),
+      linear-gradient(135deg, #fff8f4, #fdeee7);
     background-attachment: fixed;
   }
   body::before {
     content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
     background-image:
-      radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,.25), transparent),
-      radial-gradient(2px 2px at 70% 60%, rgba(255,255,255,.18), transparent),
-      radial-gradient(1.5px 1.5px at 40% 80%, rgba(255,255,255,.2), transparent),
-      radial-gradient(1.5px 1.5px at 85% 20%, rgba(255,255,255,.15), transparent);
+      radial-gradient(2px 2px at 20% 30%, rgba(255,106,61,.10), transparent),
+      radial-gradient(2px 2px at 70% 60%, rgba(47,125,240,.08), transparent),
+      radial-gradient(1.5px 1.5px at 40% 80%, rgba(255,106,61,.08), transparent),
+      radial-gradient(1.5px 1.5px at 85% 20%, rgba(47,125,240,.07), transparent);
   }
   header, .stage, .annotation, footer { position: relative; z-index: 1; }
 
   .lang { position: fixed; top: 18px; right: 18px; z-index: 10; display: flex;
-    background: rgba(255,255,255,.08); border: 1px solid var(--border); border-radius: 999px;
-    padding: 4px; backdrop-filter: blur(8px); }
-  .lang button { border: none; background: transparent; color: #cbd5e1; font-weight: 800;
+    background: #fff; border: 1px solid var(--border); border-radius: 999px;
+    padding: 4px; box-shadow: 0 6px 18px rgba(27,42,74,.10); }
+  .lang button { border: none; background: transparent; color: var(--muted); font-weight: 800;
     font-size: 14px; padding: 7px 16px; border-radius: 999px; cursor: pointer; transition: .2s; }
-  .lang button.active { background: linear-gradient(90deg,var(--gold),var(--gold-2)); color: #1e1b4b; }
+  .lang button.active { background: linear-gradient(90deg,var(--gold),var(--gold-2)); color: #fff; }
 
   header { text-align: center; margin: 38px 0 6px; padding: 0 16px; }
   .brand { position: fixed; top: 16px; left: 16px; z-index: 10; background: #fff;
@@ -49,7 +49,7 @@
   header h1 { font-size: clamp(30px,5.5vw,54px); font-weight: 900; letter-spacing: -.5px;
     background: linear-gradient(90deg,#ffb199,#ff6a3d,#ff8a5c);
     -webkit-background-clip: text; background-clip: text; color: transparent; }
-  header p { color: #c7d2fe; margin-top: 12px; font-size: 15px; }
+  header p { color: var(--muted); margin-top: 12px; font-size: 15px; }
 
   .stage { display: flex; align-items: center; justify-content: center;
     gap: clamp(16px,3vw,44px); flex-wrap: wrap; width: 100%; max-width: 1600px; padding: 26px 16px; }
@@ -65,7 +65,7 @@
   .canvas-wrap.spin.bot { filter: drop-shadow(0 0 30px rgba(52,211,153,.55)); }
   canvas { display: block; border-radius: 50%;
     width: clamp(300px, 34vw, 528px); height: auto;
-    box-shadow: 0 0 0 10px rgba(255,255,255,.10), 0 0 0 13px rgba(0,0,0,.30), 0 22px 55px rgba(0,0,0,.55); }
+    box-shadow: 0 0 0 10px #fff, 0 0 0 12px var(--border), 0 18px 44px rgba(27,42,74,.22); }
   .pointer { position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
     width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent;
     border-top: 32px solid var(--gold); filter: drop-shadow(0 4px 4px rgba(0,0,0,.55)); z-index: 6; }
@@ -83,7 +83,7 @@
   @keyframes pop { 0%{opacity:0;transform:scale(.4);} 60%{opacity:1;transform:scale(1.14);} 100%{opacity:1;transform:scale(1);} }
 
   .center-control { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-  .vs { font-size: 26px; font-weight: 900; color: rgba(255,255,255,.25); letter-spacing: 2px; }
+  .vs { font-size: 26px; font-weight: 900; color: rgba(27,42,74,.22); letter-spacing: 2px; }
   .spin-btn { font-size: 19px; font-weight: 900; letter-spacing: 1px; color: #1e1b4b;
     background: linear-gradient(90deg,var(--gold),var(--gold-2)); border: none;
     padding: 19px 42px; border-radius: 999px; cursor: pointer; box-shadow: 0 12px 32px rgba(245,158,11,.45);
@@ -96,35 +96,35 @@
     50%     { box-shadow: 0 14px 44px rgba(255,106,61,.85); }
   }
   .spin-btn:not(:disabled) { animation: btnPulse 1.9s ease-in-out infinite; }
-  .reset-btn { display: none; background: transparent; border: 1px solid var(--border);
-    color: #cbd5e1; font-weight: 700; font-size: 13px; padding: 9px 18px; border-radius: 999px;
-    cursor: pointer; transition: .2s; }
-  .reset-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
+  .reset-btn { display: none; background: #fff; border: 1px solid var(--border);
+    color: var(--muted); font-weight: 700; font-size: 13px; padding: 9px 18px; border-radius: 999px;
+    cursor: pointer; transition: .2s; box-shadow: 0 4px 12px rgba(27,42,74,.08); }
+  .reset-btn:hover { background: #f7f1ea; color: var(--navy-text); }
 
   .annotation { width: 92%; max-width: 940px; margin: 14px auto 44px;
     background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--gold);
-    border-radius: 18px; padding: 30px 34px; backdrop-filter: blur(12px);
-    box-shadow: 0 22px 55px rgba(0,0,0,.45); opacity: 0; transform: translateY(20px);
+    border-radius: 18px; padding: 30px 34px;
+    box-shadow: 0 18px 44px rgba(27,42,74,.12); opacity: 0; transform: translateY(20px);
     transition: opacity .45s, transform .45s; display: none; }
   .annotation.show { display: block; opacity: 1; transform: translateY(0); }
   .ann-head { text-transform: uppercase; letter-spacing: 2px; font-size: 12px;
     color: var(--gold); text-align: center; margin-bottom: 6px; }
   .ann-title { text-align: center; font-size: clamp(20px,3vw,28px); font-weight: 800;
-    margin-bottom: 24px; color: #fff; }
+    margin-bottom: 24px; color: var(--navy-text); }
   .ann-item { display: flex; gap: 16px; padding: 18px 0; border-top: 1px solid var(--border); }
   .ann-item:first-of-type { border-top: none; }
   .ann-badge { flex-shrink: 0; width: 130px; }
-  .ann-badge .src { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; }
+  .ann-badge .src { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
   .ann-badge .short { display: inline-block; margin-top: 7px; font-size: 16px; font-weight: 900;
-    color: #1e1b4b; padding: 7px 12px; border-radius: 8px; }
+    color: #fff; padding: 7px 12px; border-radius: 8px; }
   .ann-item.weeks .short { background: var(--gold); }
   .ann-item.bot .short { background: var(--green); }
   .ann-body { flex: 1; }
-  .ann-body .h { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 6px; }
-  .ann-body .d { font-size: 15px; line-height: 1.75; color: #cbd5e1; }
+  .ann-body .h { font-size: 18px; font-weight: 800; color: var(--navy-text); margin-bottom: 6px; }
+  .ann-body .d { font-size: 15px; line-height: 1.75; color: #475569; }
 
-  footer { width: 100%; background: rgba(0,0,0,.4); border-top: 1px solid var(--border);
-    padding: 16px; text-align: center; color: #94a3b8; font-size: 13px; margin-top: auto; }
+  footer { width: 100%; background: var(--navy-text); border-top: 1px solid var(--border);
+    padding: 16px; text-align: center; color: #cbd5e1; font-size: 13px; margin-top: auto; }
   .confetti { position: fixed; top: -12px; width: 10px; height: 16px; z-index: 999;
     pointer-events: none; border-radius: 2px; }
 
@@ -226,36 +226,20 @@ const DATA = {
         task:"Mobil va kompyuter uchun ilovalar saytini yaratish. Maxsus element: iOS / Apple havolalarini qo'yish mumkin." }
     ],
     bot: [
-      { short:"FAQ",        title:"Savol-javob boti (FAQ)",
-        task:"Foydalanuvchi tugma bosadi yoki savol yozadi, bot esa shu mavzu bo'yicha tayyor javobni qaytaradi. Istalgan mavzuga mos: o'yin, hayvon, kosmos — faqat savol-javoblarni o'zgartirasiz. «/start» va bir nechta tugma bilan ishlaydi." },
-      { short:"Viktorina",  title:"Viktorina boti",
-        task:"Bot bir nechta savol beradi, foydalanuvchi javob tanlaydi va oxirida ball/natija ko'rsatiladi. Mavzu istalgancha: savollar matnini almashtirgan zahoti viktorina yangi mavzuga moslashadi." },
-      { short:"Tavsiya",    title:"Tasodifiy tavsiya boti",
-        task:"Foydalanuvchi tugma bosadi, bot esa ro'yxatdan tasodifiy narsa qaytaradi: «bugungi fakt», «maslahat», «qahramon». Ro'yxatni almashtirib istalgan mavzuga ulash mumkin." },
-      { short:"Katalog",    title:"Menyu / katalog boti",
-        task:"Tugmalar yordamida foydalanuvchi bo'limlar bo'ylab yuradi (masalan: «Dinozavrlar», «Sayyoralar», «O'yinlar»). Har bo'lim ortida matn yoki rasm. Har qanday katalogli mavzuga mos." },
-      { short:"So'rovnoma", title:"So'rovnoma boti",
-        task:"Bot bir nechta savol beradi va foydalanuvchining javoblarini ketma-ket yig'adi (ism, yosh, sevimli narsa). Har qanday mavzuda «profil yig'ish» uchun ishlaydi." },
-      { short:"Maslahat",   title:"Maslahat beruvchi bot",
-        task:"Foydalanuvchi tanlov qiladi (kayfiyat / janr / daraja), bot esa shunga mos natija beradi. «Tanlovga qarab javob» mantig'i istalgan mavzuga ulanadi: o'yin, kitob, sport va h.k." },
-      { short:"Tabrik",     title:"Tabrik / xabar generator boti",
-        task:"Foydalanuvchi variant tanlaydi yoki ism kiritadi, bot esa chiroyli tayyor matn qaytaradi. Tabrik, taklifnoma, e'lon — mavzu ostidagi matnlarni almashtirasiz." },
-      { short:"Eslatma",    title:"Eslatma boti",
-        task:"Foydalanuvchi narsa kiritadi (sana, vazifa, hodisa), bot saqlaydi va ro'yxatini ko'rsatadi. Tug'ilgan kun, mashg'ulot, missiya — istalgan eslatma turiga moslashadi." },
-      { short:"Topishmoq",  title:"Topishmoq / so'z topish o'yini boti",
-        task:"Bot topishmoq yoki yashirin so'z beradi, foydalanuvchi javobni topishga harakat qiladi. To'g'ri/noto'g'ri javobga reaksiya bilan. Mavzu bo'yicha so'zlar ro'yxatini almashtirasiz." },
-      { short:"Reyting",    title:"Ovoz berish / reyting boti",
-        task:"Foydalanuvchilar variantlardan biriga ovoz beradi, bot esa ovozlarni sanab natijani chiqaradi. «Eng zo'r qahramon», «Eng yaxshi taom» — istalgan mavzuda so'rovnoma." },
-      { short:"Ball o'yin", title:"Ball to'plash o'yini boti",
-        task:"Har bir to'g'ri amal yoki javobda foydalanuvchiga ball qo'shiladi, joriy hisob ko'rsatiladi. Viktorina, vazifa, mini-o'yin — har qanday mavzuga ball mantig'ini ulash mumkin." },
-      { short:"Buyurtma",   title:"Buyurtma / savatcha boti",
-        task:"Foydalanuvchi menyudan narsa tanlaydi, miqdorini kiritadi, bot esa buyurtmani jamlab umumiy natijani chiqaradi. Do'kon, kafe, iksir do'koni — istalgan «menyuli» mavzuga mos." },
-      { short:"Sarguzasht", title:"Sarguzasht (hikoya) boti",
-        task:"Har bir tugma hikoyani davom ettiradi va boshqa yo'lga olib boradi («o'ngga bor / chapga bor»). Kosmos, orol, sehrli maktab — istalgan syujetga tarmoqli hikoya quriladi." },
-      { short:"Kalkulyator",title:"Yordamchi / kalkulyator boti",
-        task:"Foydalanuvchi ma'lumot kiritadi, bot esa undan natija hisoblaydi (masalan: yosh, ball, narx, masofa). Mavzuga qarab formulani almashtirasiz — universal hisoblagich." },
-      { short:"Challenge",  title:"Kunlik vazifa (challenge) boti",
-        task:"Bot har bosishda yangi topshiriq yoki maqsad beradi («bugun shuni qil»). Sport, ijod, o'qish — vazifalar ro'yxatini mavzuga moslab almashtirasiz." }
+      { short:"Tanishtiruv", title:"Sayt bilan tanishtiruv boti",
+        task:"«/start» bosilganda bot mavzu haqida qisqa salom va asosiy menyu beradi: «Bu nima?», «Qiziqarli ma'lumot», «Rasm» tugmalari. Har bir tugma tayyor matn yoki rasm qaytaradi." },
+      { short:"FAQ",          title:"Savol-javob (FAQ) boti",
+        task:"Menyuda Wix mavzusidagi sayt bo'yicha eng ko'p so'raladigan savollar tugma bo'lib turadi («Qanday ishlaydi?», «Nega zo'r?»), bosilganda tayyor javob chiqadi." },
+      { short:"Bilasizmi?",   title:"«Bilasizmi?» faktlar boti",
+        task:"Har bir tugma mavzu (Wix sayti) bo'yicha bitta qiziqarli faktni ochadi — «Yana bitta fakt» tugmasi bilan faktlarni ketma-ket ko'rsatadi." },
+      { short:"Viktorina",    title:"Viktorina boti",
+        task:"Bot savol beradi, tugmalar esa javob variantlari; bosilganda «to'g'ri/noto'g'ri» va keyingi savol keladi. Quiz Bot uslubida." },
+      { short:"Galereya",     title:"Galereya boti",
+        task:"Tugmalar bosilganda mavzuga oid rasm yoki stiker yuboradi («Suratlar», «Eng zo'r kadr»). Stickers/Image botlariga o'xshash — rasmlarni Wix mavzusi bo'yicha o'zingiz yuklaysiz." },
+      { short:"Reklama",      title:"Havola / reklama boti",
+        task:"Tugmalar foydalanuvchini kerakli joyga yo'naltiradi — eng asosiysi, o'quvchining o'z Wix saytiga («Saytni ochish», «Batafsil»). Har bir loyihaning sayti bo'lgani uchun bot uni e'lon qiladi." },
+      { short:"Qo'llanma",    title:"Qo'llanma / maslahat boti",
+        task:"Wix saytidan qanday foydalanish kerakligi bo'yicha har bir tugma qadam-baqadam yo'riqnoma yoki maslahatlar ro'yxatini beradi («Qanday qilib...», «Qoidalar», «Tavsiyalar»)." }
     ]
   },
 
@@ -293,36 +277,20 @@ const DATA = {
         task:"Создание сайта приложений для мобильных и компьютеров. Спец-элемент: можно разместить ссылки iOS / Apple." }
     ],
     bot: [
-      { short:"FAQ",         title:"Бот вопрос-ответ (FAQ)",
-        task:"Пользователь нажимает кнопку или пишет вопрос, а бот возвращает готовый ответ по этой теме. Подходит для любой темы: игра, животные, космос — меняешь только вопросы-ответы. Работает с «/start» и несколькими кнопками." },
+      { short:"Знакомство", title:"Бот-знакомство с сайтом",
+        task:"При нажатии «/start» бот выдаёт короткое приветствие по теме и главное меню: кнопки «Что это?», «Интересный факт», «Картинка». Каждая кнопка возвращает готовый текст или изображение." },
+      { short:"FAQ",         title:"Бот вопросов-ответов (FAQ)",
+        task:"В меню в виде кнопок собраны самые частые вопросы по сайту на тему Wix («Как это работает?», «Почему это круто?»); при нажатии выводится готовый ответ." },
+      { short:"А вы знали?", title:"Бот фактов «А вы знали?»",
+        task:"Каждая кнопка открывает один интересный факт по теме (Wix-сайт) — с кнопкой «Ещё один факт» показывает факты один за другим." },
       { short:"Викторина",   title:"Бот-викторина",
-        task:"Бот задаёт несколько вопросов, пользователь выбирает ответ, и в конце показывается балл/результат. Тема любая: как только меняешь текст вопросов, викторина подстраивается под новую тему." },
-      { short:"Рекоменд.",   title:"Бот случайных рекомендаций",
-        task:"Пользователь нажимает кнопку, а бот возвращает случайное из списка: «факт дня», «совет», «герой». Заменив список, можно подключить к любой теме." },
-      { short:"Каталог",     title:"Бот-меню / каталог",
-        task:"С помощью кнопок пользователь перемещается по разделам (например: «Динозавры», «Планеты», «Игры»). За каждым разделом — текст или картинка. Подходит для любой темы с каталогом." },
-      { short:"Анкета",      title:"Бот-анкета",
-        task:"Бот задаёт несколько вопросов и последовательно собирает ответы пользователя (имя, возраст, любимая вещь). Работает для «сбора профиля» в любой теме." },
-      { short:"Советчик",    title:"Бот-советчик",
-        task:"Пользователь делает выбор (настроение / жанр / уровень), а бот даёт соответствующий результат. Логика «ответ в зависимости от выбора» подключается к любой теме: игра, книга, спорт и т. д." },
-      { short:"Поздравл.",   title:"Бот-генератор поздравлений / сообщений",
-        task:"Пользователь выбирает вариант или вводит имя, а бот возвращает красивый готовый текст. Поздравление, приглашение, объявление — меняешь тексты под темой." },
-      { short:"Напомин.",    title:"Бот-напоминание",
-        task:"Пользователь вводит что-либо (дату, задачу, событие), бот сохраняет и показывает список. День рождения, занятие, миссия — подстраивается под любой вид напоминания." },
-      { short:"Загадка",     title:"Бот-игра «загадка / угадай слово»",
-        task:"Бот даёт загадку или скрытое слово, пользователь пытается найти ответ. С реакцией на правильный/неправильный ответ. Меняешь список слов по теме." },
-      { short:"Рейтинг",     title:"Бот голосования / рейтинга",
-        task:"Пользователи голосуют за один из вариантов, а бот подсчитывает голоса и выводит результат. «Лучший герой», «Лучшее блюдо» — опрос на любую тему." },
-      { short:"Очки",        title:"Бот-игра на набор очков",
-        task:"За каждое правильное действие или ответ пользователю добавляются очки, показывается текущий счёт. Викторина, задание, мини-игра — логику очков можно подключить к любой теме." },
-      { short:"Заказ",       title:"Бот заказа / корзины",
-        task:"Пользователь выбирает из меню, вводит количество, а бот собирает заказ и выводит общий итог. Магазин, кафе, лавка зелий — подходит для любой темы с «меню»." },
-      { short:"Приключение", title:"Бот-приключение (история)",
-        task:"Каждая кнопка продолжает историю и ведёт по другому пути («иди направо / иди налево»). Космос, остров, волшебная школа — для любого сюжета строится разветвлённая история." },
-      { short:"Калькулятор", title:"Бот-помощник / калькулятор",
-        task:"Пользователь вводит данные, а бот вычисляет из них результат (например: возраст, балл, цена, расстояние). В зависимости от темы меняешь формулу — универсальный калькулятор." },
-      { short:"Челлендж",    title:"Бот ежедневного задания (challenge)",
-        task:"При каждом нажатии бот даёт новое задание или цель («сделай сегодня это»). Спорт, творчество, учёба — список заданий меняешь под тему." }
+        task:"Бот задаёт вопрос, кнопки — варианты ответа; при нажатии приходит «верно/неверно» и следующий вопрос. По типу Quiz Bot." },
+      { short:"Галерея",     title:"Бот-галерея",
+        task:"При нажатии кнопок отправляет картинку или стикер по теме («Изображения», «Лучший кадр»). Похоже на Stickers/Image-боты — картинки по теме Wix загружаете вы." },
+      { short:"Реклама",     title:"Бот-ссылка / реклама",
+        task:"Кнопки направляют пользователя в нужное место — и самое главное, на собственный Wix-сайт ученика («Открыть сайт», «Подробнее»). Поскольку у каждого проекта есть свой сайт, бот его анонсирует." },
+      { short:"Инструкция",  title:"Бот «инструкция / советы»",
+        task:"На вопрос, как пользоваться сайтом по теме Wix, каждая кнопка выдаёт пошаговую инструкцию или список советов («Как сделать...», «Правила», «Рекомендации»)." }
     ]
   }
 };
@@ -427,13 +395,13 @@ class Wheel {
     }
     ctx.restore();
   }
-  spinTo(idx){
+  spinTo(idx, dur=4800){
     return new Promise(res=>{
       const n=this.items.length, seg=2*Math.PI/n;
-      const center=idx*seg+seg/2, pointer=-Math.PI/2, turns=6+secureRandom(3);
+      const center=idx*seg+seg/2, pointer=-Math.PI/2, turns=7+secureRandom(3);
       const finalA=turns*2*Math.PI+(pointer-center);
-      const start=this.angle%(2*Math.PI), delta=finalA-start, dur=4600;
-      let t0=null; const ease=t=>1-Math.pow(1-t,3);
+      const start=this.angle%(2*Math.PI), delta=finalA-start;
+      let t0=null; const ease=t=>1-Math.pow(1-t,5); // dramatik sekinlashish (quintic)
       this._tickIdx=-1;
       const step=ts=>{ if(!t0)t0=ts; const t=Math.min((ts-t0)/dur,1);
         this.angle=start+delta*ease(t); this.draw();
@@ -562,7 +530,7 @@ function confetti(){
 
 function showAllDone(){
   const t=UI[lang];
-  annBody.innerHTML='<p style="text-align:center;color:#cbd5e1;font-size:17px;line-height:1.7">'+t.allDone+'</p>';
+  annBody.innerHTML='<p style="text-align:center;color:#475569;font-size:17px;line-height:1.7">'+t.allDone+'</p>';
   annotation.classList.add("show");
   resetBtn.style.display="inline-flex";
   annotation.scrollIntoView({behavior:"smooth", block:"nearest"});
@@ -593,18 +561,25 @@ spinBtn.addEventListener("click", async ()=>{
 
   const remW=wheelWeeks.items, remB=wheelBot.items;
   const pW=secureRandom(remW.length), pB=secureRandom(remB.length);
-  const [rW,rB]=await Promise.all([ wheelWeeks.spinTo(pW), wheelBot.spinTo(pB) ]);
 
-  wrapWeeks.classList.remove("spin"); wrapBot.classList.remove("spin");
+  // Ketma-ket to'xtash: Wix oldin, Telegram bot ~1.5s kechroq to'xtaydi
+  const durW = 4600 + secureRandom(500);
+  const durB = durW + 1300 + secureRandom(500);
 
-  // g'olib bo'laklar yonadi + silkinadi + tantana ovozi
-  wheelWeeks.flashWin(rW); wheelBot.flashWin(rB);
-  shake(wrapWeeks); shake(wrapBot);
+  // Har bir baraban TO'XTAGAN ZAHOTI yonadi + silkinadi (mustaqil)
+  const spinW = wheelWeeks.spinTo(pW, durW).then(r=>{
+    wrapWeeks.classList.remove("spin"); wheelWeeks.flashWin(r); shake(wrapWeeks); return r;
+  });
+  const spinB = wheelBot.spinTo(pB, durB).then(r=>{
+    wrapBot.classList.remove("spin"); wheelBot.flashWin(r); shake(wrapBot); return r;
+  });
+  const [rW,rB] = await Promise.all([spinW, spinB]);
+
+  // Ikkalasi to'xtagach — tantana
   playWin();
 
   const wItem=remW[rW], bItem=remB[rB];
-  usedWeeks.add(wItem._idx);
-  usedBot.add(bItem._idx);
+  usedWeeks.add(wItem._idx);   // faqat Wix'dan o'chadi (Telegram bot o'chmaydi)
 
   showPop(popWeeks, wItem.short);
   showPop(popBot, bItem.short);
@@ -615,8 +590,8 @@ spinBtn.addEventListener("click", async ()=>{
   resetBtn.style.display="inline-flex";
   setTimeout(()=>annotation.scrollIntoView({behavior:"smooth", block:"nearest"}), 400);
 
-  // g'olib yonib bo'lgach barabandan olib tashlaymiz va tugmani ochamiz
-  setTimeout(()=>{ refreshWheels(); spinBtn.disabled=false; }, 1550);
+  // g'olib yonib bo'lgach faqat Wix barabanidan olib tashlaymiz (bot to'liq qoladi)
+  setTimeout(()=>{ wheelWeeks.setItems(buildRemaining("weeks")); spinBtn.disabled=false; }, 1550);
 });
 </script>
 </body>
