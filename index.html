@@ -347,9 +347,9 @@ const UI = {
 };
 /* ============================================================ */
 
-const PALETTE = ["#e7ded0","#dfe6dd","#dde6f0","#efe2dc","#e3e0ec","#e8ecdf","#f0e6da","#dde9ea",
-                 "#ece0e6","#e0ebe6","#f1e7d6","#dee4ef"];
-const TEXT_COLOR = "#14274a";
+/* Yorqin, bir-biridan ajralib turadigan ranglar */
+const PALETTE = ["#ef4444","#f97316","#f59e0b","#eab308","#a3e635","#22c55e","#10b981","#14b8a6",
+                 "#06b6d4","#0ea5e9","#3b82f6","#6366f1","#8b5cf6","#d946ef","#ec4899"];
 
 function secureRandom(n){ const a=new Uint32Array(1); crypto.getRandomValues(a); return a[0]%n; }
 
@@ -368,8 +368,13 @@ class Wheel {
       ctx.fillStyle=PALETTE[i%PALETTE.length]; ctx.fill();
       ctx.strokeStyle="#fff"; ctx.lineWidth=2; ctx.stroke();
       ctx.save(); ctx.rotate(s+seg/2); ctx.textAlign="right";
-      ctx.fillStyle=TEXT_COLOR; ctx.font="800 "+fs+"px 'Segoe UI', sans-serif";
-      ctx.fillText(this.items[i].short, r-16, fs*0.35); ctx.restore();
+      ctx.font="800 "+fs+"px 'Segoe UI', sans-serif";
+      // qora matn + oq kontur — istalgan rangda yaxshi o'qiladi
+      ctx.lineWidth=3.5; ctx.strokeStyle="rgba(255,255,255,.9)"; ctx.lineJoin="round";
+      ctx.strokeText(this.items[i].short, r-16, fs*0.35);
+      ctx.fillStyle="#111111";
+      ctx.fillText(this.items[i].short, r-16, fs*0.35);
+      ctx.restore();
     }
     ctx.restore();
   }
