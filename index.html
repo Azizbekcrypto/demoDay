@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Demoday Baraban</title>
+<style>
+  :root {
+    --gold: #fbbf24; --gold-2: #f59e0b; --green: #34d399;
+    --navy-text: #14274a; --card: rgba(255,255,255,0.06); --border: rgba(255,255,255,0.14);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Segoe UI", system-ui, sans-serif; min-height: 100vh; color: #f1f5f9;
+    display: flex; flex-direction: column; align-items: center; overflow-x: hidden;
+    background:
+      radial-gradient(1200px 700px at 12% -8%, #4338ca 0%, transparent 52%),
+      radial-gradient(1100px 700px at 92% 6%, #0e7490 0%, transparent 50%),
+      radial-gradient(900px 600px at 50% 110%, #6d28d9 0%, transparent 55%),
+      linear-gradient(135deg, #0f172a, #1e1b4b);
+    background-attachment: fixed;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,.25), transparent),
+      radial-gradient(2px 2px at 70% 60%, rgba(255,255,255,.18), transparent),
+      radial-gradient(1.5px 1.5px at 40% 80%, rgba(255,255,255,.2), transparent),
+      radial-gradient(1.5px 1.5px at 85% 20%, rgba(255,255,255,.15), transparent);
+  }
+  header, .stage, .annotation, footer { position: relative; z-index: 1; }
+
+  .lang { position: fixed; top: 18px; right: 18px; z-index: 10; display: flex;
+    background: rgba(255,255,255,.08); border: 1px solid var(--border); border-radius: 999px;
+    padding: 4px; backdrop-filter: blur(8px); }
+  .lang button { border: none; background: transparent; color: #cbd5e1; font-weight: 800;
+    font-size: 14px; padding: 7px 16px; border-radius: 999px; cursor: pointer; transition: .2s; }
+  .lang button.active { background: linear-gradient(90deg,var(--gold),var(--gold-2)); color: #1e1b4b; }
+
+  header { text-align: center; margin: 38px 0 6px; padding: 0 16px; }
+  header .kicker { text-transform: uppercase; letter-spacing: 5px; font-size: 12px;
+    color: var(--gold); margin-bottom: 10px; font-weight: 700; }
+  header h1 { font-size: clamp(30px,5.5vw,54px); font-weight: 900; letter-spacing: -.5px;
+    background: linear-gradient(90deg,#fbbf24,#34d399,#60a5fa);
+    -webkit-background-clip: text; background-clip: text; color: transparent; }
+  header p { color: #c7d2fe; margin-top: 12px; font-size: 15px; }
+
+  .stage { display: flex; align-items: center; justify-content: center;
+    gap: clamp(24px,5vw,66px); flex-wrap: wrap; width: 100%; max-width: 1400px; padding: 26px 16px; }
+  .wheel-box { display: flex; flex-direction: column; align-items: center; }
+  .wheel-title { font-size: 20px; font-weight: 800; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 9px; text-shadow: 0 2px 10px rgba(0,0,0,.4); }
+  .wheel-box.weeks .wheel-title { color: var(--gold); }
+  .wheel-box.bot .wheel-title { color: var(--green); }
+  .wheel-title .dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
+
+  .canvas-wrap { position: relative; transition: filter .3s; }
+  .canvas-wrap.spin.weeks { filter: drop-shadow(0 0 30px rgba(251,191,36,.55)); }
+  .canvas-wrap.spin.bot { filter: drop-shadow(0 0 30px rgba(52,211,153,.55)); }
+  canvas { display: block; border-radius: 50%;
+    box-shadow: 0 0 0 10px rgba(255,255,255,.10), 0 0 0 13px rgba(0,0,0,.30), 0 22px 55px rgba(0,0,0,.55); }
+  .pointer { position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent;
+    border-top: 32px solid #ef4444; filter: drop-shadow(0 4px 4px rgba(0,0,0,.55)); z-index: 6; }
+  .hub { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 70px; height: 70px; border-radius: 50%; background: #fff; border: 4px solid var(--navy-text);
+    box-shadow: 0 6px 16px rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center;
+    z-index: 5; font-weight: 900; font-size: 13px; color: var(--navy-text); }
+
+  .pop { margin-top: 20px; font-size: 20px; font-weight: 900; text-align: center;
+    padding: 11px 24px; border-radius: 14px; background: #fff; color: var(--navy-text);
+    min-height: 24px; max-width: 320px; opacity: 0; transform: scale(.4); }
+  .pop.show { animation: pop .5s cubic-bezier(.2,1.6,.4,1) forwards; }
+  .wheel-box.weeks .pop.show { box-shadow: 0 0 26px rgba(251,191,36,.5); outline: 3px solid var(--gold); }
+  .wheel-box.bot .pop.show { box-shadow: 0 0 26px rgba(52,211,153,.5); outline: 3px solid var(--green); }
+  @keyframes pop { 0%{opacity:0;transform:scale(.4);} 60%{opacity:1;transform:scale(1.14);} 100%{opacity:1;transform:scale(1);} }
+
+  .center-control { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .vs { font-size: 26px; font-weight: 900; color: rgba(255,255,255,.25); letter-spacing: 2px; }
+  .spin-btn { font-size: 19px; font-weight: 900; letter-spacing: 1px; color: #1e1b4b;
+    background: linear-gradient(90deg,var(--gold),var(--gold-2)); border: none;
+    padding: 19px 42px; border-radius: 999px; cursor: pointer; box-shadow: 0 12px 32px rgba(245,158,11,.45);
+    transition: transform .15s, box-shadow .15s; white-space: nowrap; }
+  .spin-btn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 18px 44px rgba(245,158,11,.6); }
+  .spin-btn:active { transform: translateY(0); }
+  .spin-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+  .reset-btn { display: none; background: transparent; border: 1px solid var(--border);
+    color: #cbd5e1; font-weight: 700; font-size: 13px; padding: 9px 18px; border-radius: 999px;
+    cursor: pointer; transition: .2s; }
+  .reset-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
+
+  .annotation { width: 92%; max-width: 940px; margin: 14px auto 44px;
+    background: var(--card); border: 1px solid var(--border); border-top: 4px solid var(--gold);
+    border-radius: 18px; padding: 30px 34px; backdrop-filter: blur(12px);
+    box-shadow: 0 22px 55px rgba(0,0,0,.45); opacity: 0; transform: translateY(20px);
+    transition: opacity .45s, transform .45s; display: none; }
+  .annotation.show { display: block; opacity: 1; transform: translateY(0); }
+  .ann-head { text-transform: uppercase; letter-spacing: 2px; font-size: 12px;
+    color: var(--gold); text-align: center; margin-bottom: 6px; }
+  .ann-title { text-align: center; font-size: clamp(20px,3vw,28px); font-weight: 800;
+    margin-bottom: 24px; color: #fff; }
+  .ann-item { display: flex; gap: 16px; padding: 18px 0; border-top: 1px solid var(--border); }
+  .ann-item:first-of-type { border-top: none; }
+  .ann-badge { flex-shrink: 0; width: 130px; }
+  .ann-badge .src { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; }
+  .ann-badge .short { display: inline-block; margin-top: 7px; font-size: 16px; font-weight: 900;
+    color: #1e1b4b; padding: 7px 12px; border-radius: 8px; }
+  .ann-item.weeks .short { background: var(--gold); }
+  .ann-item.bot .short { background: var(--green); }
+  .ann-body { flex: 1; }
+  .ann-body .h { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+  .ann-body .d { font-size: 15px; line-height: 1.75; color: #cbd5e1; }
+
+  footer { width: 100%; background: rgba(0,0,0,.4); border-top: 1px solid var(--border);
+    padding: 16px; text-align: center; color: #94a3b8; font-size: 13px; margin-top: auto; }
+  .confetti { position: fixed; top: -12px; width: 10px; height: 16px; z-index: 999;
+    pointer-events: none; border-radius: 2px; }
+
+  @media (max-width: 900px) {
+    .vs { display: none; } .center-control { order: 3; width: 100%; }
+    .ann-item { flex-direction: column; gap: 8px; } .ann-badge { width: auto; }
+  }
+</style>
+</head>
+<body id="top">
+
+  <div class="lang">
+    <button id="btnUz" class="active" data-lang="uz">UZ</button>
+    <button id="btnRu" data-lang="ru">RU</button>
+  </div>
+
+  <header>
+    <div class="kicker" id="kicker">Demoday</div>
+    <h1 id="title">🎡 Vazifa Barabani</h1>
+    <p id="subtitle">Ikkala barabanni aylantiring — tanlangan vazifa pastda ochiladi</p>
+  </header>
+
+  <main class="stage">
+    <div class="wheel-box weeks">
+      <div class="wheel-title"><span class="dot"></span> <span id="weeksTitle">Wix bo'yicha</span></div>
+      <div class="canvas-wrap weeks" id="wrapWeeks">
+        <div class="pointer"></div>
+        <canvas id="wheelWeeks" width="440" height="440"></canvas>
+        <div class="hub">WIX</div>
+      </div>
+      <div class="pop" id="popWeeks"></div>
+    </div>
+
+    <div class="center-control">
+      <div class="vs">VS</div>
+      <button class="spin-btn" id="spinBtn">🎲 AYLANTIRISH</button>
+      <button class="reset-btn" id="resetBtn">↺ Qayta boshlash</button>
+    </div>
+
+    <div class="wheel-box bot">
+      <div class="wheel-title"><span class="dot"></span> <span id="botTitle">Telegram bot bo'yicha</span></div>
+      <div class="canvas-wrap bot" id="wrapBot">
+        <div class="pointer"></div>
+        <canvas id="wheelBot" width="440" height="440"></canvas>
+        <div class="hub">BOT</div>
+      </div>
+      <div class="pop" id="popBot"></div>
+    </div>
+  </main>
+
+  <section class="annotation" id="annotation">
+    <div class="ann-head" id="annHead">Natija</div>
+    <div class="ann-title" id="annTitle">Demoday'da qilishingiz kerak bo'lgan vazifalar</div>
+    <div id="annBody"></div>
+  </section>
+
+  <footer id="footer">© Demoday — Vazifa Barabani · statik versiya</footer>
+
+<script>
+/* ============================================================
+   STATIK MA'LUMOTLAR — UZ va RU alohida.
+   weeks = Wix loyihalari (15 ta) · bot = Telegram bot turlari (15 ta)
+   Har element: { short, title, task } — qo'lda tahrirlang.
+   ============================================================ */
+const DATA = {
+  uz: {
+    weeks: [
+      { short:"Hayvonot",   title:"Hayvonot do'koni",
+        task:"Kategoriyalar: hayvon turi — itlar, mushuklar, baliqlar, qushlar. Maxsus element: «Mening uy hayvonim» foto-burchagi." },
+      { short:"Muzqaymoq",  title:"Muzqaymoq kafe",
+        task:"Kategoriyalar: ta'm bo'yicha — mevali, shokoladli, sutli. Maxsus element: kunlik aksiya bloki." },
+      { short:"O'yinchoq",  title:"O'yinchoq do'koni",
+        task:"Kategoriyalar: yosh bo'yicha — 0–3, 4–7, 8+. Maxsus element: «Eng ko'p sotilgan» ro'yxati." },
+      { short:"Kosmik",     title:"Kosmik muzey",
+        task:"Kategoriyalar: bo'lim — sayyoralar, raketalar, astronavtlar. Maxsus element: video yoki 3D ko'rinish." },
+      { short:"Sport",      title:"Sport anjomlari",
+        task:"Kategoriyalar: sport turi — futbol, basketbol, velosiped. Maxsus element: o'lcham jadvali." },
+      { short:"Robotlar",   title:"Robotlar do'koni",
+        task:"Kategoriyalar: vazifasi bo'yicha — uy uchun, o'yin uchun, kosmos uchun. Maxsus element: texnik ma'lumot jadvali." },
+      { short:"Shirinlik",  title:"Shirinliklar do'koni",
+        task:"Kategoriyalar: tur bo'yicha — tort, konfet, pechenye. Maxsus element: buyurtma formasi." },
+      { short:"Gullar",     title:"Gul / o'simlik do'koni",
+        task:"Kategoriyalar: parvarish bo'yicha — yorug'sevar, soyabardosh, sovg'abop. Maxsus element: parvarish maslahati." },
+      { short:"Multfilm",   title:"Sevimli multfilmlarim",
+        task:"Bo'limlar: qahramonlar, epizodlar, multfilmlar ro'yxati. Maxsus element: qahramonlar galereyasi va epizodlar ro'yxati." },
+      { short:"Kitoblar",   title:"Kitoblar do'koni",
+        task:"Bola eng yoqqan kitobi haqida sahifa tuzadi: kitob nomi, qahramonlari va voqea nima haqida ekani (sirni ochib qo'ymasdan). Maxsus element: kitob reklamasi uchun 2 sahifa — muqova surati va tavsiya matni bilan." },
+      { short:"Uy hayvon",  title:"Uy hayvonlari yordamchisi",
+        task:"Bo'limlar: parvarish maslahatlari, uy hayvonlari turlari. Maxsus element: uy hayvonlari ovqatlari." },
+      { short:"Retseptlar", title:"Retseptlar",
+        task:"Kategoriyalar: Yevropa taomlari, O'zbek taomlari, Pizza. Maxsus element: taomlar rasmlarini kiritish." },
+      { short:"Shahar gid", title:"Shahar gidi",
+        task:"Bo'limlar: shahringdagi qiziq joylar, O'zbekistondagi qiziqarli va qadimiy shaharlar. Maxsus element: sayohat uchun transport narxi." },
+      { short:"Maktabim",   title:"Mening maktabim",
+        task:"Bo'limlar: maktab haqida ma'lumotlar. Maxsus element: a'lochi o'quvchilar ro'yxati." },
+      { short:"Ilovalar",   title:"Ilovalar",
+        task:"Mobil va kompyuter uchun ilovalar saytini yaratish. Maxsus element: iOS / Apple havolalarini qo'yish mumkin." }
+    ],
+    bot: [
+      { short:"FAQ",        title:"Savol-javob boti (FAQ)",
+        task:"Foydalanuvchi tugma bosadi yoki savol yozadi, bot esa shu mavzu bo'yicha tayyor javobni qaytaradi. Istalgan mavzuga mos: o'yin, hayvon, kosmos — faqat savol-javoblarni o'zgartirasiz. «/start» va bir nechta tugma bilan ishlaydi." },
+      { short:"Viktorina",  title:"Viktorina boti",
+        task:"Bot bir nechta savol beradi, foydalanuvchi javob tanlaydi va oxirida ball/natija ko'rsatiladi. Mavzu istalgancha: savollar matnini almashtirgan zahoti viktorina yangi mavzuga moslashadi." },
+      { short:"Tavsiya",    title:"Tasodifiy tavsiya boti",
+        task:"Foydalanuvchi tugma bosadi, bot esa ro'yxatdan tasodifiy narsa qaytaradi: «bugungi fakt», «maslahat», «qahramon». Ro'yxatni almashtirib istalgan mavzuga ulash mumkin." },
+      { short:"Katalog",    title:"Menyu / katalog boti",
+        task:"Tugmalar yordamida foydalanuvchi bo'limlar bo'ylab yuradi (masalan: «Dinozavrlar», «Sayyoralar», «O'yinlar»). Har bo'lim ortida matn yoki rasm. Har qanday katalogli mavzuga mos." },
+      { short:"So'rovnoma", title:"So'rovnoma boti",
+        task:"Bot bir nechta savol beradi va foydalanuvchining javoblarini ketma-ket yig'adi (ism, yosh, sevimli narsa). Har qanday mavzuda «profil yig'ish» uchun ishlaydi." },
+      { short:"Maslahat",   title:"Maslahat beruvchi bot",
+        task:"Foydalanuvchi tanlov qiladi (kayfiyat / janr / daraja), bot esa shunga mos natija beradi. «Tanlovga qarab javob» mantig'i istalgan mavzuga ulanadi: o'yin, kitob, sport va h.k." },
+      { short:"Tabrik",     title:"Tabrik / xabar generator boti",
+        task:"Foydalanuvchi variant tanlaydi yoki ism kiritadi, bot esa chiroyli tayyor matn qaytaradi. Tabrik, taklifnoma, e'lon — mavzu ostidagi matnlarni almashtirasiz." },
+      { short:"Eslatma",    title:"Eslatma boti",
+        task:"Foydalanuvchi narsa kiritadi (sana, vazifa, hodisa), bot saqlaydi va ro'yxatini ko'rsatadi. Tug'ilgan kun, mashg'ulot, missiya — istalgan eslatma turiga moslashadi." },
+      { short:"Topishmoq",  title:"Topishmoq / so'z topish o'yini boti",
+        task:"Bot topishmoq yoki yashirin so'z beradi, foydalanuvchi javobni topishga harakat qiladi. To'g'ri/noto'g'ri javobga reaksiya bilan. Mavzu bo'yicha so'zlar ro'yxatini almashtirasiz." },
+      { short:"Reyting",    title:"Ovoz berish / reyting boti",
+        task:"Foydalanuvchilar variantlardan biriga ovoz beradi, bot esa ovozlarni sanab natijani chiqaradi. «Eng zo'r qahramon», «Eng yaxshi taom» — istalgan mavzuda so'rovnoma." },
+      { short:"Ball o'yin", title:"Ball to'plash o'yini boti",
+        task:"Har bir to'g'ri amal yoki javobda foydalanuvchiga ball qo'shiladi, joriy hisob ko'rsatiladi. Viktorina, vazifa, mini-o'yin — har qanday mavzuga ball mantig'ini ulash mumkin." },
+      { short:"Buyurtma",   title:"Buyurtma / savatcha boti",
+        task:"Foydalanuvchi menyudan narsa tanlaydi, miqdorini kiritadi, bot esa buyurtmani jamlab umumiy natijani chiqaradi. Do'kon, kafe, iksir do'koni — istalgan «menyuli» mavzuga mos." },
+      { short:"Sarguzasht", title:"Sarguzasht (hikoya) boti",
+        task:"Har bir tugma hikoyani davom ettiradi va boshqa yo'lga olib boradi («o'ngga bor / chapga bor»). Kosmos, orol, sehrli maktab — istalgan syujetga tarmoqli hikoya quriladi." },
+      { short:"Kalkulyator",title:"Yordamchi / kalkulyator boti",
+        task:"Foydalanuvchi ma'lumot kiritadi, bot esa undan natija hisoblaydi (masalan: yosh, ball, narx, masofa). Mavzuga qarab formulani almashtirasiz — universal hisoblagich." },
+      { short:"Challenge",  title:"Kunlik vazifa (challenge) boti",
+        task:"Bot har bosishda yangi topshiriq yoki maqsad beradi («bugun shuni qil»). Sport, ijod, o'qish — vazifalar ro'yxatini mavzuga moslab almashtirasiz." }
+    ]
+  },
+
+  ru: {
+    weeks: [
+      { short:"Зоомагазин", title:"Зоомагазин",
+        task:"Категории: вид животного — собаки, кошки, рыбы, птицы. Спец-элемент: фото-уголок «Мой питомец»." },
+      { short:"Мороженое",  title:"Кафе-мороженое",
+        task:"Категории: по вкусу — фруктовое, шоколадное, молочное. Спец-элемент: блок дневной акции." },
+      { short:"Игрушки",    title:"Магазин игрушек",
+        task:"Категории: по возрасту — 0–3, 4–7, 8+. Спец-элемент: список «самых продаваемых»." },
+      { short:"Космос",     title:"Космический музей",
+        task:"Категории: раздел — планеты, ракеты, астронавты. Спец-элемент: видео или 3D-вид." },
+      { short:"Спорт",      title:"Спортивный инвентарь",
+        task:"Категории: вид спорта — футбол, баскетбол, велосипед. Спец-элемент: таблица размеров." },
+      { short:"Роботы",     title:"Магазин роботов",
+        task:"Категории: назначение — для дома, для игры, для космоса. Спец-элемент: таблица технических характеристик." },
+      { short:"Сладости",   title:"Магазин сладостей",
+        task:"Категории: вид — торт, конфеты, печенье. Спец-элемент: форма заказа." },
+      { short:"Цветы",      title:"Магазин цветов / растений",
+        task:"Категории: уход — светолюбивые, теневыносливые, подарочные. Спец-элемент: совет по уходу." },
+      { short:"Мультики",   title:"Мои любимые мультфильмы",
+        task:"Разделы: герои, эпизоды, список мультфильмов. Спец-элемент: галерея героев и список эпизодов." },
+      { short:"Книги",      title:"Книжный магазин",
+        task:"Ребёнок создаёт страницу о любимой книге: название, герои и о чём история (не раскрывая секрета). Спец-элемент: реклама книги — 2 страницы с обложкой и текстом рекомендации." },
+      { short:"Питомцы",    title:"Помощник по домашним животным",
+        task:"Разделы: советы по уходу, виды домашних животных. Спец-элемент: корм для домашних животных." },
+      { short:"Рецепты",    title:"Рецепты",
+        task:"Категории: европейские блюда, узбекские блюда, пицца. Спец-элемент: добавление фотографий блюд." },
+      { short:"Гид города", title:"Городской гид",
+        task:"Разделы: интересные места в твоём городе, интересные и древние города Узбекистана. Спец-элемент: стоимость транспорта для путешествия." },
+      { short:"Моя школа",  title:"Моя школа",
+        task:"Разделы: информация о школе. Спец-элемент: список отличников." },
+      { short:"Приложения", title:"Приложения",
+        task:"Создание сайта приложений для мобильных и компьютеров. Спец-элемент: можно разместить ссылки iOS / Apple." }
+    ],
+    bot: [
+      { short:"FAQ",         title:"Бот вопрос-ответ (FAQ)",
+        task:"Пользователь нажимает кнопку или пишет вопрос, а бот возвращает готовый ответ по этой теме. Подходит для любой темы: игра, животные, космос — меняешь только вопросы-ответы. Работает с «/start» и несколькими кнопками." },
+      { short:"Викторина",   title:"Бот-викторина",
+        task:"Бот задаёт несколько вопросов, пользователь выбирает ответ, и в конце показывается балл/результат. Тема любая: как только меняешь текст вопросов, викторина подстраивается под новую тему." },
+      { short:"Рекоменд.",   title:"Бот случайных рекомендаций",
+        task:"Пользователь нажимает кнопку, а бот возвращает случайное из списка: «факт дня», «совет», «герой». Заменив список, можно подключить к любой теме." },
+      { short:"Каталог",     title:"Бот-меню / каталог",
+        task:"С помощью кнопок пользователь перемещается по разделам (например: «Динозавры», «Планеты», «Игры»). За каждым разделом — текст или картинка. Подходит для любой темы с каталогом." },
+      { short:"Анкета",      title:"Бот-анкета",
+        task:"Бот задаёт несколько вопросов и последовательно собирает ответы пользователя (имя, возраст, любимая вещь). Работает для «сбора профиля» в любой теме." },
+      { short:"Советчик",    title:"Бот-советчик",
+        task:"Пользователь делает выбор (настроение / жанр / уровень), а бот даёт соответствующий результат. Логика «ответ в зависимости от выбора» подключается к любой теме: игра, книга, спорт и т. д." },
+      { short:"Поздравл.",   title:"Бот-генератор поздравлений / сообщений",
+        task:"Пользователь выбирает вариант или вводит имя, а бот возвращает красивый готовый текст. Поздравление, приглашение, объявление — меняешь тексты под темой." },
+      { short:"Напомин.",    title:"Бот-напоминание",
+        task:"Пользователь вводит что-либо (дату, задачу, событие), бот сохраняет и показывает список. День рождения, занятие, миссия — подстраивается под любой вид напоминания." },
+      { short:"Загадка",     title:"Бот-игра «загадка / угадай слово»",
+        task:"Бот даёт загадку или скрытое слово, пользователь пытается найти ответ. С реакцией на правильный/неправильный ответ. Меняешь список слов по теме." },
+      { short:"Рейтинг",     title:"Бот голосования / рейтинга",
+        task:"Пользователи голосуют за один из вариантов, а бот подсчитывает голоса и выводит результат. «Лучший герой», «Лучшее блюдо» — опрос на любую тему." },
+      { short:"Очки",        title:"Бот-игра на набор очков",
+        task:"За каждое правильное действие или ответ пользователю добавляются очки, показывается текущий счёт. Викторина, задание, мини-игра — логику очков можно подключить к любой теме." },
+      { short:"Заказ",       title:"Бот заказа / корзины",
+        task:"Пользователь выбирает из меню, вводит количество, а бот собирает заказ и выводит общий итог. Магазин, кафе, лавка зелий — подходит для любой темы с «меню»." },
+      { short:"Приключение", title:"Бот-приключение (история)",
+        task:"Каждая кнопка продолжает историю и ведёт по другому пути («иди направо / иди налево»). Космос, остров, волшебная школа — для любого сюжета строится разветвлённая история." },
+      { short:"Калькулятор", title:"Бот-помощник / калькулятор",
+        task:"Пользователь вводит данные, а бот вычисляет из них результат (например: возраст, балл, цена, расстояние). В зависимости от темы меняешь формулу — универсальный калькулятор." },
+      { short:"Челлендж",    title:"Бот ежедневного задания (challenge)",
+        task:"При каждом нажатии бот даёт новое задание или цель («сделай сегодня это»). Спорт, творчество, учёба — список заданий меняешь под тему." }
+    ]
+  }
+};
+
+const UI = {
+  uz: {
+    kicker:"Demoday", title:"🎡 Vazifa Barabani",
+    subtitle:"Ikkala barabanni aylantiring — tanlangan vazifa pastda ochiladi",
+    weeksTitle:"Wix bo'yicha", botTitle:"Telegram bot bo'yicha",
+    spin:"🎲 AYLANTIRISH", annHead:"Natija",
+    annTitle:"Demoday'da qilishingiz kerak bo'lgan vazifalar",
+    weeksFrom:"Wix'dan", botFrom:"Telegram bot'dan",
+    footer:"© Demoday — Vazifa Barabani · statik versiya", htmlLang:"uz",
+    reset:"↺ Qayta boshlash",
+    allDone:"🎉 Barcha variantlar tanlab bo'lindi! Qaytadan boshlash uchun «Qayta boshlash» tugmasini bosing yoki sahifani yangilang."
+  },
+  ru: {
+    kicker:"Demoday", title:"🎡 Барабан заданий",
+    subtitle:"Крутите оба барабана — выбранное задание откроется ниже",
+    weeksTitle:"По Wix", botTitle:"По Telegram боту",
+    spin:"🎲 КРУТИТЬ", annHead:"Результат",
+    annTitle:"Задания, которые нужно выполнить на Demoday",
+    weeksFrom:"Из Wix", botFrom:"Из Telegram бота",
+    footer:"© Demoday — Барабан заданий · статичная версия", htmlLang:"ru",
+    reset:"↺ Начать заново",
+    allDone:"🎉 Все варианты выбраны! Нажмите «Начать заново» или обновите страницу."
+  }
+};
+/* ============================================================ */
+
+const PALETTE = ["#e7ded0","#dfe6dd","#dde6f0","#efe2dc","#e3e0ec","#e8ecdf","#f0e6da","#dde9ea",
+                 "#ece0e6","#e0ebe6","#f1e7d6","#dee4ef"];
+const TEXT_COLOR = "#14274a";
+
+function secureRandom(n){ const a=new Uint32Array(1); crypto.getRandomValues(a); return a[0]%n; }
+
+class Wheel {
+  constructor(id, items){ this.canvas=document.getElementById(id); this.ctx=this.canvas.getContext("2d");
+    this.items=items; this.angle=0; this.draw(); }
+  setItems(items){ this.items=items; this.angle=0; this.draw(); }
+  draw(){
+    const ctx=this.ctx, W=this.canvas.width, H=this.canvas.height;
+    const cx=W/2, cy=H/2, r=W/2-6, n=this.items.length, seg=2*Math.PI/n;
+    const fs = n>12 ? 13 : (n>9 ? 15 : 18);
+    ctx.clearRect(0,0,W,H); ctx.save(); ctx.translate(cx,cy); ctx.rotate(this.angle);
+    for(let i=0;i<n;i++){
+      const s=i*seg;
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,r,s,s+seg); ctx.closePath();
+      ctx.fillStyle=PALETTE[i%PALETTE.length]; ctx.fill();
+      ctx.strokeStyle="#fff"; ctx.lineWidth=2; ctx.stroke();
+      ctx.save(); ctx.rotate(s+seg/2); ctx.textAlign="right";
+      ctx.fillStyle=TEXT_COLOR; ctx.font="800 "+fs+"px 'Segoe UI', sans-serif";
+      ctx.fillText(this.items[i].short, r-16, fs*0.35); ctx.restore();
+    }
+    ctx.restore();
+  }
+  spinTo(idx){
+    return new Promise(res=>{
+      const n=this.items.length, seg=2*Math.PI/n;
+      const center=idx*seg+seg/2, pointer=-Math.PI/2, turns=6+secureRandom(3);
+      const finalA=turns*2*Math.PI+(pointer-center);
+      const start=this.angle%(2*Math.PI), delta=finalA-start, dur=4500;
+      let t0=null; const ease=t=>1-Math.pow(1-t,3);
+      const step=ts=>{ if(!t0)t0=ts; const t=Math.min((ts-t0)/dur,1);
+        this.angle=start+delta*ease(t); this.draw();
+        if(t<1) requestAnimationFrame(step); else res(idx); };
+      requestAnimationFrame(step);
+    });
+  }
+}
+
+let lang = "uz";
+
+/* Tanlangan (o'yindan chiqqan) variantlar indekslari. Sahifa yangilanganda tozalanadi. */
+const usedWeeks = new Set();
+const usedBot   = new Set();
+
+function buildRemaining(type){
+  const arr = DATA[lang][type];
+  const used = (type === "weeks") ? usedWeeks : usedBot;
+  const out = [];
+  arr.forEach((it, i) => { if (!used.has(i)) out.push(Object.assign({ _idx:i }, it)); });
+  return out;
+}
+
+const wheelWeeks=new Wheel("wheelWeeks", buildRemaining("weeks"));
+const wheelBot=new Wheel("wheelBot", buildRemaining("bot"));
+
+function refreshWheels(){
+  wheelWeeks.setItems(buildRemaining("weeks"));
+  wheelBot.setItems(buildRemaining("bot"));
+}
+
+const spinBtn=document.getElementById("spinBtn");
+const resetBtn=document.getElementById("resetBtn");
+const popWeeks=document.getElementById("popWeeks");
+const popBot=document.getElementById("popBot");
+const wrapWeeks=document.getElementById("wrapWeeks");
+const wrapBot=document.getElementById("wrapBot");
+const annotation=document.getElementById("annotation");
+const annBody=document.getElementById("annBody");
+
+function applyLang(l){
+  lang=l;
+  const t=UI[l];
+  document.documentElement.lang=t.htmlLang;
+  document.getElementById("kicker").textContent=t.kicker;
+  document.getElementById("title").textContent=t.title;
+  document.getElementById("subtitle").textContent=t.subtitle;
+  document.getElementById("weeksTitle").textContent=t.weeksTitle;
+  document.getElementById("botTitle").textContent=t.botTitle;
+  document.getElementById("spinBtn").textContent=t.spin;
+  document.getElementById("annHead").textContent=t.annHead;
+  document.getElementById("annTitle").textContent=t.annTitle;
+  document.getElementById("footer").textContent=t.footer;
+  resetBtn.textContent=t.reset;
+
+  refreshWheels();
+  annotation.classList.remove("show");
+  popWeeks.classList.remove("show");
+  popBot.classList.remove("show");
+
+  document.getElementById("btnUz").classList.toggle("active", l==="uz");
+  document.getElementById("btnRu").classList.toggle("active", l==="ru");
+}
+document.getElementById("btnUz").addEventListener("click", ()=>applyLang("uz"));
+document.getElementById("btnRu").addEventListener("click", ()=>applyLang("ru"));
+
+function showPop(el, short){ el.textContent=short; el.classList.remove("show"); void el.offsetWidth; el.classList.add("show"); }
+
+function annItem(cls, src, item){
+  return '<div class="ann-item '+cls+'">'+
+    '<div class="ann-badge"><div class="src">'+src+'</div><span class="short">'+item.short+'</span></div>'+
+    '<div class="ann-body"><div class="h">'+item.title+'</div><div class="d">'+item.task+'</div></div></div>';
+}
+
+function confetti(){
+  for(let i=0;i<90;i++){
+    const c=document.createElement("div"); c.className="confetti";
+    c.style.left=secureRandom(100)+"vw";
+    c.style.background=["#fbbf24","#34d399","#60a5fa","#f472b6","#a78bfa","#f87171"][secureRandom(6)];
+    c.style.transform="rotate("+secureRandom(360)+"deg)";
+    document.body.appendChild(c);
+    c.animate([{top:"-12px",opacity:1},{top:"100vh",opacity:.2}],
+      {duration:2200+secureRandom(1600),easing:"ease-in"}).onfinish=()=>c.remove();
+  }
+}
+
+function showAllDone(){
+  const t=UI[lang];
+  annBody.innerHTML='<p style="text-align:center;color:#cbd5e1;font-size:17px;line-height:1.7">'+t.allDone+'</p>';
+  annotation.classList.add("show");
+  resetBtn.style.display="inline-flex";
+  annotation.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+function doReset(){
+  usedWeeks.clear(); usedBot.clear();
+  refreshWheels();
+  annotation.classList.remove("show");
+  popWeeks.classList.remove("show");
+  popBot.classList.remove("show");
+  resetBtn.style.display="none";
+}
+resetBtn.addEventListener("click", doReset);
+
+spinBtn.addEventListener("click", async ()=>{
+  const t=UI[lang];
+  if(!wheelWeeks.items.length || !wheelBot.items.length){ showAllDone(); return; }
+
+  spinBtn.disabled=true;
+  annotation.classList.remove("show");
+  popWeeks.classList.remove("show");
+  popBot.classList.remove("show");
+  document.getElementById("top").scrollIntoView({behavior:"smooth", block:"start"});
+
+  wrapWeeks.classList.add("spin"); wrapBot.classList.add("spin");
+
+  const remW=wheelWeeks.items, remB=wheelBot.items;
+  const pW=secureRandom(remW.length), pB=secureRandom(remB.length);
+  const [rW,rB]=await Promise.all([ wheelWeeks.spinTo(pW), wheelBot.spinTo(pB) ]);
+
+  wrapWeeks.classList.remove("spin"); wrapBot.classList.remove("spin");
+
+  const wItem=remW[rW], bItem=remB[rB];
+  usedWeeks.add(wItem._idx);
+  usedBot.add(bItem._idx);
+
+  showPop(popWeeks, wItem.short);
+  showPop(popBot, bItem.short);
+
+  annBody.innerHTML = annItem("weeks", t.weeksFrom, wItem) + annItem("bot", t.botFrom, bItem);
+  annotation.classList.add("show");
+  confetti();
+  resetBtn.style.display="inline-flex";
+  setTimeout(()=>annotation.scrollIntoView({behavior:"smooth", block:"nearest"}), 350);
+  setTimeout(refreshWheels, 850);
+
+  spinBtn.disabled=false;
+});
+</script>
+</body>
+</html>
