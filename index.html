@@ -90,7 +90,12 @@
     transition: transform .15s, box-shadow .15s; white-space: nowrap; }
   .spin-btn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 18px 44px rgba(245,158,11,.6); }
   .spin-btn:active { transform: translateY(0); }
-  .spin-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+  .spin-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; animation: none; }
+  @keyframes btnPulse {
+    0%,100% { box-shadow: 0 12px 32px rgba(255,106,61,.45); }
+    50%     { box-shadow: 0 14px 44px rgba(255,106,61,.85); }
+  }
+  .spin-btn:not(:disabled) { animation: btnPulse 1.9s ease-in-out infinite; }
   .reset-btn { display: none; background: transparent; border: 1px solid var(--border);
     color: #cbd5e1; font-weight: 700; font-size: 13px; padding: 9px 18px; border-radius: 999px;
     cursor: pointer; transition: .2s; }
@@ -134,6 +139,7 @@
   <div class="lang">
     <button id="btnUz" class="active" data-lang="uz">UZ</button>
     <button id="btnRu" data-lang="ru">RU</button>
+    <button id="sndBtn" title="Ovoz">🔊</button>
   </div>
 
   <header>
@@ -347,34 +353,77 @@ const UI = {
 };
 /* ============================================================ */
 
-/* Yorqin, bir-biridan ajralib turadigan ranglar */
-const PALETTE = ["#ef4444","#f97316","#f59e0b","#eab308","#a3e635","#22c55e","#10b981","#14b8a6",
-                 "#06b6d4","#0ea5e9","#3b82f6","#6366f1","#8b5cf6","#d946ef","#ec4899"];
+/* Wheelofnames uslubidagi 4 ta yorqin rang (qizil / sariq / yashil / ko'k) */
+const PALETTE = ["#e8392f","#f6c700","#21a83c","#2f57d6"];
 
 function secureRandom(n){ const a=new Uint32Array(1); crypto.getRandomValues(a); return a[0]%n; }
 
+/* Rangning yorqinligi (och/to'qligi) — matn rangini tanlash uchun */
+function lum(hex){
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return 0.299*r + 0.587*g + 0.114*b;
+}
+
+/* ===== Ovoz effektlari (Web Audio — tashqi fayl kerak emas) ===== */
+let audioCtx=null, soundOn=true, lastTickT=0;
+function ac(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return audioCtx; }
+function resumeAudio(){ const c=ac(); if(c && c.state==="suspended") c.resume(); }
+function playTick(){
+  if(!soundOn) return; const c=ac(); if(!c) return;
+  if(c.currentTime-lastTickT < 0.028) return; lastTickT=c.currentTime;
+  const o=c.createOscillator(), g=c.createGain(); o.type="square"; o.frequency.value=820;
+  const t=c.currentTime;
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.06,t+0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+0.05);
+  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+0.06);
+}
+function playWin(){
+  if(!soundOn) return; const c=ac(); if(!c) return;
+  const notes=[523.25,659.25,783.99,1046.5];
+  notes.forEach((f,i)=>{ const o=c.createOscillator(), g=c.createGain(); o.type="triangle"; o.frequency.value=f;
+    const t=c.currentTime+i*0.11;
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.14,t+0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.45);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+0.5); });
+}
+
+/* Silkinish animatsiyasi */
+function shake(el){
+  el.animate(
+    [{transform:'translateX(0)'},{transform:'translateX(-7px)'},{transform:'translateX(7px)'},
+     {transform:'translateX(-4px)'},{transform:'translateX(0)'}],
+    {duration:340, easing:'ease-out'});
+}
+
 class Wheel {
   constructor(id, items){ this.canvas=document.getElementById(id); this.ctx=this.canvas.getContext("2d");
-    this.items=items; this.angle=0; this.draw(); }
-  setItems(items){ this.items=items; this.angle=0; this.draw(); }
+    this.items=items; this.angle=0; this.onTick=null; this._tickIdx=-1; this.hi=null; this.hiAlpha=0; this.draw(); }
+  setItems(items){ this.items=items; this.angle=0; this.hi=null; this.hiAlpha=0; this._tickIdx=-1; this.draw(); }
   draw(){
     const ctx=this.ctx, W=this.canvas.width, H=this.canvas.height;
     const cx=W/2, cy=H/2, r=W/2-6, n=this.items.length, seg=2*Math.PI/n;
-    const fs = n>12 ? 16 : (n>9 ? 18 : 21);
+    const fs = n>12 ? 19 : (n>9 ? 22 : 25);
     ctx.clearRect(0,0,W,H); ctx.save(); ctx.translate(cx,cy); ctx.rotate(this.angle);
     for(let i=0;i<n;i++){
       const s=i*seg;
-      ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,r,s,s+seg); ctx.closePath();
-      ctx.fillStyle=PALETTE[i%PALETTE.length]; ctx.fill();
-      ctx.strokeStyle="#fff"; ctx.lineWidth=2; ctx.stroke();
+      const col=PALETTE[i%PALETTE.length];
+      // +0.006 — bo'laklar tutashib tursin, orada oq chiziq qolmasin
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,r,s,s+seg+0.006); ctx.closePath();
+      ctx.fillStyle=col; ctx.fill();
+      const dark = lum(col) > 150;   // och fon -> qora matn, to'q fon -> oq matn
       ctx.save(); ctx.rotate(s+seg/2); ctx.textAlign="right";
-      ctx.font="800 "+fs+"px 'Segoe UI', sans-serif";
-      // qora matn + oq kontur — istalgan rangda yaxshi o'qiladi
-      ctx.lineWidth=3.5; ctx.strokeStyle="rgba(255,255,255,.9)"; ctx.lineJoin="round";
-      ctx.strokeText(this.items[i].short, r-16, fs*0.35);
-      ctx.fillStyle="#111111";
-      ctx.fillText(this.items[i].short, r-16, fs*0.35);
+      ctx.font="500 "+fs+"px 'Segoe UI', sans-serif";
+      ctx.shadowColor = dark ? "rgba(255,255,255,.45)" : "rgba(0,0,0,.35)";
+      ctx.shadowBlur=4; ctx.shadowOffsetY=1;
+      ctx.fillStyle = dark ? "#111111" : "#ffffff";
+      ctx.fillText(this.items[i].short, r-18, fs*0.35);
       ctx.restore();
+    }
+    // g'olib bo'lak yonishi (flash)
+    if(this.hi!=null && this.hiAlpha>0){
+      const s=this.hi*seg;
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,r,s,s+seg+0.006); ctx.closePath();
+      ctx.fillStyle="rgba(255,255,255,"+this.hiAlpha+")"; ctx.fill();
     }
     ctx.restore();
   }
@@ -383,13 +432,26 @@ class Wheel {
       const n=this.items.length, seg=2*Math.PI/n;
       const center=idx*seg+seg/2, pointer=-Math.PI/2, turns=6+secureRandom(3);
       const finalA=turns*2*Math.PI+(pointer-center);
-      const start=this.angle%(2*Math.PI), delta=finalA-start, dur=4500;
+      const start=this.angle%(2*Math.PI), delta=finalA-start, dur=4600;
       let t0=null; const ease=t=>1-Math.pow(1-t,3);
+      this._tickIdx=-1;
       const step=ts=>{ if(!t0)t0=ts; const t=Math.min((ts-t0)/dur,1);
         this.angle=start+delta*ease(t); this.draw();
+        // ko'rsatkich ostidagi bo'lak o'zgarsa — "tик"
+        let loc=(-Math.PI/2 - this.angle)%(2*Math.PI); if(loc<0) loc+=2*Math.PI;
+        const ci=Math.floor(loc/seg);
+        if(ci!==this._tickIdx){ this._tickIdx=ci; if(this.onTick) this.onTick(ci); }
         if(t<1) requestAnimationFrame(step); else res(idx); };
       requestAnimationFrame(step);
     });
+  }
+  flashWin(idx){
+    this.hi=idx; let t0=null; const dur=1400;
+    const loop=ts=>{ if(!t0)t0=ts; const t=(ts-t0)/dur;
+      if(t>=1 || this.hi==null){ this.hi=null; this.hiAlpha=0; this.draw(); return; }
+      this.hiAlpha=Math.abs(Math.sin(t*Math.PI*3))*0.55; this.draw();
+      requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
   }
 }
 
@@ -423,6 +485,28 @@ const wrapWeeks=document.getElementById("wrapWeeks");
 const wrapBot=document.getElementById("wrapBot");
 const annotation=document.getElementById("annotation");
 const annBody=document.getElementById("annBody");
+const sndBtn=document.getElementById("sndBtn");
+
+/* Aylanish vaqtida ko'rsatkichni "chertish" + tик ovozi */
+function setupTicks(wheel, wrapEl){
+  const ptr=wrapEl.querySelector(".pointer");
+  wheel.onTick=()=>{
+    playTick();
+    ptr.animate(
+      [{transform:'translateX(-50%) translateY(0) rotate(0)'},
+       {transform:'translateX(-50%) translateY(7px) rotate(5deg)'},
+       {transform:'translateX(-50%) translateY(0) rotate(0)'}],
+      {duration:130, easing:'ease-out'});
+  };
+}
+setupTicks(wheelWeeks, wrapWeeks);
+setupTicks(wheelBot, wrapBot);
+
+sndBtn.addEventListener("click", ()=>{
+  soundOn=!soundOn;
+  sndBtn.textContent = soundOn ? "🔊" : "🔇";
+  if(soundOn) resumeAudio();
+});
 
 function applyLang(l){
   lang=l;
@@ -459,14 +543,20 @@ function annItem(cls, src, item){
 }
 
 function confetti(){
-  for(let i=0;i<90;i++){
+  const cols=["#e8392f","#f6c700","#21a83c","#2f57d6","#ff6a3d","#ff8a5c","#4f9df5","#ffd1bf"];
+  for(let i=0;i<150;i++){
     const c=document.createElement("div"); c.className="confetti";
+    const size=6+secureRandom(10);
     c.style.left=secureRandom(100)+"vw";
-    c.style.background=["#ff6a3d","#ff8a5c","#ffb199","#4f9df5","#1b2a4a","#ffd1bf"][secureRandom(6)];
-    c.style.transform="rotate("+secureRandom(360)+"deg)";
+    c.style.width=size+"px"; c.style.height=(size+4)+"px";
+    c.style.background=cols[secureRandom(cols.length)];
+    if(secureRandom(2)) c.style.borderRadius="50%";
     document.body.appendChild(c);
-    c.animate([{top:"-12px",opacity:1},{top:"100vh",opacity:.2}],
-      {duration:2200+secureRandom(1600),easing:"ease-in"}).onfinish=()=>c.remove();
+    const drift=(secureRandom(200)-100)+"px";
+    c.animate(
+      [{transform:"translateY(-12px) translateX(0) rotate(0)", opacity:1},
+       {transform:"translateY(100vh) translateX("+drift+") rotate("+(secureRandom(720)-360)+"deg)", opacity:.15}],
+      {duration:2400+secureRandom(2000), easing:"cubic-bezier(.2,.6,.4,1)"}).onfinish=()=>c.remove();
   }
 }
 
@@ -493,6 +583,7 @@ spinBtn.addEventListener("click", async ()=>{
   if(!wheelWeeks.items.length || !wheelBot.items.length){ showAllDone(); return; }
 
   spinBtn.disabled=true;
+  resumeAudio();
   annotation.classList.remove("show");
   popWeeks.classList.remove("show");
   popBot.classList.remove("show");
@@ -506,6 +597,11 @@ spinBtn.addEventListener("click", async ()=>{
 
   wrapWeeks.classList.remove("spin"); wrapBot.classList.remove("spin");
 
+  // g'olib bo'laklar yonadi + silkinadi + tantana ovozi
+  wheelWeeks.flashWin(rW); wheelBot.flashWin(rB);
+  shake(wrapWeeks); shake(wrapBot);
+  playWin();
+
   const wItem=remW[rW], bItem=remB[rB];
   usedWeeks.add(wItem._idx);
   usedBot.add(bItem._idx);
@@ -517,10 +613,10 @@ spinBtn.addEventListener("click", async ()=>{
   annotation.classList.add("show");
   confetti();
   resetBtn.style.display="inline-flex";
-  setTimeout(()=>annotation.scrollIntoView({behavior:"smooth", block:"nearest"}), 350);
-  setTimeout(refreshWheels, 850);
+  setTimeout(()=>annotation.scrollIntoView({behavior:"smooth", block:"nearest"}), 400);
 
-  spinBtn.disabled=false;
+  // g'olib yonib bo'lgach barabandan olib tashlaymiz va tugmani ochamiz
+  setTimeout(()=>{ refreshWheels(); spinBtn.disabled=false; }, 1550);
 });
 </script>
 </body>
