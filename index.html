@@ -132,9 +132,61 @@
     .vs { display: none; } .center-control { order: 3; width: 100%; }
     .ann-item { flex-direction: column; gap: 8px; } .ann-badge { width: auto; }
   }
+
+  /* ===== Login oynasi ===== */
+  .login-overlay { position: fixed; inset: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    background:
+      radial-gradient(1100px 650px at 12% -8%, #ffe3d6 0%, transparent 55%),
+      radial-gradient(1000px 650px at 92% 4%, #dfeaff 0%, transparent 55%),
+      linear-gradient(135deg, #fff8f4, #fdeee7); }
+  .login-overlay.hide { display: none; }
+  .login-card { width: 100%; max-width: 380px; background: var(--card);
+    border: 1px solid var(--border); border-top: 4px solid var(--gold);
+    border-radius: 18px; padding: 34px 30px; box-shadow: 0 18px 44px rgba(27,42,74,.16); }
+  .login-card .brand-mini { display: flex; justify-content: center; margin-bottom: 18px; }
+  .login-card .brand-mini img { width: 110px; height: auto; }
+  .login-card h2 { text-align: center; font-size: 24px; font-weight: 900; margin-bottom: 4px;
+    background: linear-gradient(90deg,#ffb199,#ff6a3d,#ff8a5c);
+    -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .login-card p.sub { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 22px; }
+  .login-field { margin-bottom: 14px; }
+  .login-field label { display: block; font-size: 13px; font-weight: 700;
+    color: var(--navy-text); margin-bottom: 6px; }
+  .login-field input { width: 100%; padding: 12px 14px; font-size: 15px;
+    border: 1px solid var(--border); border-radius: 10px; outline: none; transition: .2s;
+    color: var(--navy-text); background: #fff; }
+  .login-field input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,106,61,.15); }
+  .login-btn { width: 100%; margin-top: 8px; font-size: 16px; font-weight: 900; color: #1e1b4b;
+    background: linear-gradient(90deg,var(--gold),var(--gold-2)); border: none;
+    padding: 14px; border-radius: 999px; cursor: pointer; transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 12px 32px rgba(245,158,11,.35); }
+  .login-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(245,158,11,.5); }
+  .login-err { margin-top: 14px; text-align: center; color: #e8392f; font-size: 14px;
+    font-weight: 700; min-height: 18px; display: none; }
+  .login-err.show { display: block; }
 </style>
 </head>
 <body id="top">
+
+  <!-- ===== Login oynasi ===== -->
+  <div class="login-overlay" id="loginOverlay">
+    <form class="login-card" id="loginForm" autocomplete="off">
+      <div class="brand-mini"><img src="coddycamp.jpg" alt="CoddyCamp IT Academy" /></div>
+      <h2>Kirish</h2>
+      <p class="sub">Davom etish uchun login va parolni kiriting</p>
+      <div class="login-field">
+        <label for="loginUser">Login</label>
+        <input type="text" id="loginUser" placeholder="Login" autocomplete="off" />
+      </div>
+      <div class="login-field">
+        <label for="loginPass">Parol</label>
+        <input type="password" id="loginPass" placeholder="Parol" autocomplete="off" />
+      </div>
+      <button type="submit" class="login-btn">Kirish</button>
+      <div class="login-err" id="loginErr">Login yoki parol noto'g'ri!</div>
+    </form>
+  </div>
 
   <div class="lang">
     <button id="btnUz" class="active" data-lang="uz">UZ</button>
@@ -186,6 +238,32 @@
   <footer id="footer">© CoddyCamp IT Academy — Demoday · Vazifa Barabani</footer>
 
 <script>
+/* ============================================================
+   LOGIN — statik login/parol tekshiruvi.
+   Login: Azizbek · Parol: Azizbek
+   ============================================================ */
+(function(){
+  const LOGIN = "Azizbek";
+  const PASS  = "Azizbek";
+  const overlay = document.getElementById("loginOverlay");
+  const form    = document.getElementById("loginForm");
+  const userIn  = document.getElementById("loginUser");
+  const passIn  = document.getElementById("loginPass");
+  const errEl   = document.getElementById("loginErr");
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    if(userIn.value === LOGIN && passIn.value === PASS){
+      overlay.classList.add("hide");
+    } else {
+      errEl.classList.add("show");
+      passIn.value = "";
+      passIn.focus();
+    }
+  });
+  userIn.focus();
+})();
+
 /* ============================================================
    STATIK MA'LUMOTLAR — UZ va RU alohida.
    weeks = Wix loyihalari (15 ta) · bot = Telegram bot turlari (15 ta)
