@@ -240,11 +240,15 @@
 <script>
 /* ============================================================
    LOGIN — statik login/parol tekshiruvi.
-   Login: Azizbek · Parol: Azizbek
+   Ruxsat etilgan juftliklar:
+     Login: Azizbek · Parol: Azizbek
+     Login: Coddy   · Parol: Camp
    ============================================================ */
 (function(){
-  const LOGIN = "Azizbek";
-  const PASS  = "Azizbek";
+  const CREDS = [
+    { login: "Azizbek", pass: "Azizbek" },
+    { login: "Coddy",   pass: "Camp"    },
+  ];
   const overlay = document.getElementById("loginOverlay");
   const form    = document.getElementById("loginForm");
   const userIn  = document.getElementById("loginUser");
@@ -253,7 +257,8 @@
 
   form.addEventListener("submit", function(e){
     e.preventDefault();
-    if(userIn.value === LOGIN && passIn.value === PASS){
+    const ok = CREDS.some(c => userIn.value === c.login && passIn.value === c.pass);
+    if(ok){
       overlay.classList.add("hide");
     } else {
       errEl.classList.add("show");
